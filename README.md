@@ -1,0 +1,29 @@
+# 托育收费与家庭负担
+
+本项目使用 Python 3.11 及以上版本，仅依赖标准库，无需安装第三方包。数据文件均为本地合成记录，不含真实个人或机构资料。
+
+tariffs 管理收费日历、分摊和补助；households 校验家庭、儿童及入托关系；analysis 核算家庭月支出及加权分布；publication 归档版本、复核与公开汇总。
+
+金额使用整数分，家庭收入是全年家庭收入。押金与经营支出分开。同一家庭儿童共享补助上限；样本权重属于家庭，月份不增加家庭数。公开汇总进行小组保护，内部明细不用于公开。
+
+在项目根目录运行完整测试：
+
+```sh
+python3 -m unittest discover -s tests -v
+```
+
+编译检查：
+
+```sh
+python3 -m compileall -q .
+```
+
+实际演示：
+
+```sh
+python3 nursery_report.py demo --fixture fixtures/county.json
+```
+
+演示在临时目录内建立本地状态，结束后自动清理。测试、编译与演示在依赖已准备的环境内均不下载数据或软件。输入错误以非零退出码及错误对象报告。更多子命令可通过对应入口的 --help 查看。
+
+容器环境可执行 `docker build -t local-analysis .`，再运行 `docker run --rm --network none local-analysis`。镜像固定基础内容摘要，构建后运行只访问本地文件。完整测试与演示也可直接使用已有 Python 环境。

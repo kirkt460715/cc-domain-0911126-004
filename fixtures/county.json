@@ -1,0 +1,238 @@
+{
+  "version": 1,
+  "providers": [
+    {
+      "id": "p",
+      "region": "east",
+      "capacity": 3,
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "closed": [],
+      "extra_open": []
+    },
+    {
+      "id": "q",
+      "region": "west",
+      "capacity": 5,
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "closed": [
+        "2026-11-02"
+      ],
+      "extra_open": [
+        "2026-11-07"
+      ]
+    }
+  ],
+  "households": [
+    {
+      "id": "h",
+      "region": "east",
+      "income_low": 1200000,
+      "income_high": 1200000,
+      "weight": 2,
+      "children": [
+        {
+          "id": "h0",
+          "birth": "2025-01-31"
+        },
+        {
+          "id": "h1",
+          "birth": "2025-01-31"
+        }
+      ]
+    },
+    {
+      "id": "i",
+      "region": "west",
+      "income_low": 2400000,
+      "income_high": 4800000,
+      "weight": 1,
+      "children": [
+        {
+          "id": "i0",
+          "birth": "2025-01-31"
+        }
+      ]
+    },
+    {
+      "id": "missing",
+      "region": "east",
+      "income_low": null,
+      "income_high": null,
+      "weight": 3,
+      "children": [
+        {
+          "id": "missing0",
+          "birth": "2025-01-31"
+        }
+      ]
+    },
+    {
+      "id": "zero",
+      "region": "west",
+      "income_low": 0,
+      "income_high": 0,
+      "weight": 1,
+      "children": [
+        {
+          "id": "zero0",
+          "birth": "2025-01-31"
+        }
+      ]
+    },
+    {
+      "id": "nonuser",
+      "region": "east",
+      "income_low": 6000000,
+      "income_high": 6000000,
+      "weight": 1,
+      "children": []
+    }
+  ],
+  "fees": [
+    {
+      "id": "care",
+      "provider": "p",
+      "start": "2026-01-01",
+      "end": "2027-01-01",
+      "kind": "monthly",
+      "amount": 30000,
+      "required": true,
+      "proration": "calendar",
+      "min_age": 0,
+      "max_age": 48,
+      "refundable": false
+    },
+    {
+      "id": "meals",
+      "provider": "p",
+      "start": "2026-01-01",
+      "end": "2027-01-01",
+      "kind": "attendance",
+      "amount": 1200,
+      "required": true,
+      "proration": "calendar",
+      "min_age": 0,
+      "max_age": 48,
+      "refundable": false
+    },
+    {
+      "id": "security",
+      "provider": "p",
+      "start": "2026-01-01",
+      "end": "2027-01-01",
+      "kind": "once",
+      "amount": 5000,
+      "required": true,
+      "proration": "calendar",
+      "min_age": 0,
+      "max_age": 48,
+      "refundable": true
+    }
+  ],
+  "subsidies": [
+    {
+      "id": "family",
+      "start": "2026-01-01",
+      "end": "2027-01-01",
+      "region": "*",
+      "mode": "percent",
+      "value": 5000,
+      "income_ceiling": 3000000,
+      "min_age": 0,
+      "max_age": 36,
+      "stack_group": "main",
+      "priority": 5,
+      "family_month_cap": 20000
+    },
+    {
+      "id": "local",
+      "start": "2026-01-01",
+      "end": "2027-01-01",
+      "region": "east",
+      "mode": "flat",
+      "value": 3000,
+      "income_ceiling": 2000000,
+      "min_age": 12,
+      "max_age": 36,
+      "stack_group": "local",
+      "priority": 1,
+      "family_month_cap": 6000
+    }
+  ],
+  "enrollments": [
+    {
+      "id": "eh0",
+      "child": "h0",
+      "provider": "p",
+      "start": "2026-11-01",
+      "end": "2026-12-01",
+      "options": [],
+      "attendance": [
+        "2026-11-03",
+        "2026-11-04"
+      ]
+    },
+    {
+      "id": "eh1",
+      "child": "h1",
+      "provider": "p",
+      "start": "2026-11-01",
+      "end": "2026-12-01",
+      "options": [],
+      "attendance": [
+        "2026-11-03",
+        "2026-11-04"
+      ]
+    },
+    {
+      "id": "ei0",
+      "child": "i0",
+      "provider": "p",
+      "start": "2026-11-01",
+      "end": "2026-12-01",
+      "options": [],
+      "attendance": [
+        "2026-11-03",
+        "2026-11-04"
+      ]
+    },
+    {
+      "id": "emissing0",
+      "child": "missing0",
+      "provider": "p",
+      "start": "2026-11-01",
+      "end": "2026-12-01",
+      "options": [],
+      "attendance": [
+        "2026-11-03",
+        "2026-11-04"
+      ]
+    },
+    {
+      "id": "ezero0",
+      "child": "zero0",
+      "provider": "p",
+      "start": "2026-11-01",
+      "end": "2026-12-01",
+      "options": [],
+      "attendance": [
+        "2026-11-03",
+        "2026-11-04"
+      ]
+    }
+  ]
+}
