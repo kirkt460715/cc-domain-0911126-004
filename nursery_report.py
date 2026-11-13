@@ -34,6 +34,8 @@ def demonstration(path, start, end):
             if not checked['valid']:
                 raise ValueError('demonstration audit failed')
             service.dispatch('release', {'id': 'baseline', 'label': 'public-v1'})
+            service.dispatch('study-create', {'id': 'contribution-review', 'input': 'county', 'definition': {'start': start, 'end': end, 'programs': sorted(catalog.subsidies), 'method': 'exact'}})
+            study = service.dispatch('study-get', {'id': 'contribution-review'})
             exported = bundle.write(catalog, result, root / 'bundle')
             tabular.write_directory(catalog.document, root / 'csv')
             if tabular.read_directory(root / 'csv').fingerprint != catalog.fingerprint:
@@ -46,6 +48,7 @@ def demonstration(path, start, end):
                 'bundle': exported,
                 'archive': recovery.audit(archive),
                 'by_income': grouped(result, ['income_band']),
+                'contribution_study': study['result']['report'],
                 'data': 'local_synthetic_fixture',
             }
 

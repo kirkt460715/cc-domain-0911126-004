@@ -5,6 +5,7 @@ from tariffs.catalog import Catalog
 from tariffs.primitives import canonical, digest, word, integer
 from analysis.engine import evaluate, verify
 from analysis.quality import audit_result
+from analysis.contributions import normalize_definition, run_study, resume_study as extend_study, verify_study
 from publication.disclosure import publication_packet, validate_packet
 
 
@@ -35,6 +36,14 @@ class Archive:
             analysis TEXT NOT NULL REFERENCES analyses(id),
             packet TEXT NOT NULL,
             packet_digest TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS studies(
+            id TEXT PRIMARY KEY,
+            input TEXT NOT NULL REFERENCES inputs(id),
+            definition TEXT NOT NULL,
+            definition_digest TEXT NOT NULL,
+            result TEXT NOT NULL,
+            revision INTEGER NOT NULL DEFAULT 1
         );
         ''')
 
@@ -175,3 +184,44 @@ class Archive:
         if packet['result_digest'] != current['result']['result_digest']:
             raise ValueError('release points to another analysis result')
         return {'label': label, 'analysis': row['analysis'], 'packet': packet}
+
+    def create_study(self, ident, input_id, definition, max_permutations=None):
+        word(ident, 'study.id')
+        catalog = Catalog(self.input(input_id)['document'])
+        normalized = normalize_definition(catalog, definition)
+        signature = digest(normalized)
+        with self.atomic():
+            existing = self.db.execute('SELECT * FROM studies WHERE id=?', (ident,)).fetchone()
+            if existing:
+                if existing['definition_digest'] != signature or existing['input'] != input_id:
+                    raise Conflict('study id already binds another definition')
+            else:
+                result = run_study(catalog, normalized, max_permutations)
+                self.db.execute('INSERT INTO studies(id,input,definition,definition_digest,result) VALUES(?,?,?,?,?)', (ident, input_id, canonical(normalized), signature, canonical(result)))
+        return self.study(ident)
+
+    def study(self, ident):
+        row = self.db.execute('SELECT * FROM studies WHERE id=?', (ident,)).fetchone()
+        if row is None:
+            raise KeyError(ident)
+        definition = json.loads(row['definition'])
+        if digest(definition) != row['definition_digest']:
+            raise ValueError('study definition integrity failure')
+        result = json.loads(row['result'])
+        if result['definition'] != definition:
+            raise ValueError('study result binds another definition')
+        verify_study(result)
+        return {'id': ident, 'input': row['input'], 'definition': definition, 'definition_digest': row['definition_digest'], 'result': result, 'revision': row['revision']}
+
+    def resume_study(self, ident, additional_permutations):
+        integer(additional_permutations, 'additional_permutations', 1)
+        with self.atomic():
+            current = self.study(ident)
+            if current['definition']['method'] != 'sampled':
+                raise Conflict('only sampled contribution studies can be extended')
+            catalog = Catalog(self.input(current['input'])['document'])
+            result = extend_study(catalog, current['definition'], current['result'], additional_permutations)
+            updated = self.db.execute('UPDATE studies SET result=?,revision=revision+1 WHERE id=? AND revision=?', (canonical(result), ident, current['revision'])).rowcount
+            if not updated:
+                raise Conflict('another worker updated the study')
+        return self.study(ident)

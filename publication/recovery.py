@@ -3,6 +3,7 @@ from pathlib import Path
 import sqlite3
 from tariffs.catalog import Catalog
 from analysis.quality import audit_result
+from analysis.contributions import replay_study
 from publication.store import Archive
 
 
@@ -30,10 +31,16 @@ def audit(archive):
         if run['state'] == 'failed' and not run['error']:
             raise ValueError('failed analysis lacks error')
     releases = [archive.publication(row[0]) for row in archive.db.execute('SELECT label FROM releases')]
+    studies = [archive.study(row[0]) for row in archive.db.execute('SELECT id FROM studies')]
+    for item in studies:
+        source = archive.input(item['input'])
+        if item['definition']['input_digest'] != source['digest']:
+            raise ValueError('study request source mismatch')
+        replay_study(Catalog(source['document']), item['result'])
     if archive.db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='review_cases'").fetchone():
         from publication.review import ReviewDesk
         ReviewDesk(archive).audit()
-    return {'valid': True, 'inputs': len(inputs), 'analyses': len(runs), 'releases': len(releases)}
+    return {'valid': True, 'inputs': len(inputs), 'analyses': len(runs), 'releases': len(releases), 'studies': len(studies)}
 
 
 def backup(archive, destination):

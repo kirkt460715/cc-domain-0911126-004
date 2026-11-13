@@ -90,6 +90,15 @@ class Service:
         if command == 'release':
             fields(body, ('id', 'label'), ('minimum_households',))
             return self.archive.release(body['label'], body['id'], body.get('minimum_households', 3))
+        if command == 'study-create':
+            fields(body, ('id', 'input', 'definition'), ('max_permutations',))
+            return self.archive.create_study(body['id'], body['input'], body['definition'], body.get('max_permutations'))
+        if command == 'study-get':
+            fields(body, ('id',))
+            return self.archive.study(body['id'])
+        if command == 'study-resume':
+            fields(body, ('id', 'additional_permutations'))
+            return self.archive.resume_study(body['id'], body['additional_permutations'])
         if command == 'get-release':
             fields(body, ('label',))
             return self.archive.publication(body['label'])
@@ -98,7 +107,7 @@ class Service:
             return audit(self.archive)
         if command == 'list':
             fields(body, ('table',))
-            allowed = {'inputs': 'id', 'analyses': 'id', 'releases': 'label'}
+            allowed = {'inputs': 'id', 'analyses': 'id', 'releases': 'label', 'studies': 'id'}
             table = body['table']
             if table not in allowed:
                 raise ValueError('unknown archive collection')
